@@ -1,6 +1,6 @@
 change all "..."
 ```sh
-# debian 8/9
+# debian 8/9 openvz&kvm
 echo 'deb [arch=amd64] http://ftp.us.debian.org/debian/ stable main contrib non-free' > /etc/apt/sources.list
 apt update
 apt install -y ca-certificates htop curl wget openssh-server vim ranger git shadowsocks-libev aria2 iptables
@@ -33,16 +33,8 @@ wget https://raw.githubusercontent.com/tkkcc/rinetd/master/rinetd -O /usr/bin/ri
 chmod +x /usr/bin/rinetd
 echo '0.0.0.0 40000 0.0.0.0 40000' > /etc/rinetd.conf
 iface=$(ip -4 addr | awk '{if ($1 ~ /inet/ && $NF ~ /^[ve]/) {a=$NF}} END{print a}')
-cat>/etc/systemd/system/rinetd.service <<EOF
-[Service]
-ExecStart=/usr/bin/rinetd -f -c /etc/rinetd.conf raw $iface
-ExecStop=/usr/bin/killall -9 rinetd
-[Install]
-WantedBy=multi-user.target
-EOF
-systemctl restart rinetd
-systemctl status -l --full --no-pager rinetd
-systemctl enable rinetd
+echo "/usr/bin/rinetd -f -c /etc/rinetd.conf raw $iface&" >> /etc/rc.local 
+chmod +x /etc/rc.local
 ```
 > `rinetd` is same as [nanqinlang](https://github.com/tcp-nanqinlang/lkl-rinetd), better than [linhua55](https://github.com/linhua55/lkl_study) in my case
 
