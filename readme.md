@@ -27,13 +27,13 @@ cat>/etc/shadowsocks-libev/config.json<<EOF
 }
 EOF
 systemctl restart shadowsocks-libev
-systemctl status --no-pager -l shadowsocks-libev 
+systemctl status --no-pager -l shadowsocks-libev
 # bbr
 wget https://raw.githubusercontent.com/tkkcc/rinetd/master/rinetd -O /usr/bin/rinetd
 chmod +x /usr/bin/rinetd
 echo '0.0.0.0 40000 0.0.0.0 40000' > /etc/rinetd.conf
 iface=$(ip -4 addr | awk '{if ($1 ~ /inet/ && $NF ~ /^[ve]/) {a=$NF}} END{print a}')
-echo "/usr/bin/rinetd -f -c /etc/rinetd.conf raw $iface&" >> /etc/rc.local 
+echo "/usr/bin/rinetd -f -c /etc/rinetd.conf raw $iface&" >> /etc/rc.local
 chmod +x /etc/rc.local
 ```
 > `rinetd` is same as [nanqinlang](https://github.com/tcp-nanqinlang/lkl-rinetd), better than [linhua55](https://github.com/linhua55/lkl_study) in my case
@@ -50,12 +50,25 @@ cat>/etc/aria2/aria2.conf<<EOF
 dir=/download
 input-file=/etc/aria2/aria2.session
 save-session=/etc/aria2/aria2.session
+continue=true
+max-concurrent-downloads=16
+max-connection-per-server=16
+split=16
 enable-rpc=true
 rpc-listen-all=true
 rpc-allow-origin-all=true
 rpc-listen-port=40050
 rpc-secret=...
 EOF
+# update tracker
+f=/etc/aria2/aria2.conf
+list=`wget -qO- https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_all.txt|awk NF|sed ":a;N;s/\n/,/g;ta"`
+if [ -z "`grep "bt-tracker" $f`" ]; then
+    sed -i '$a bt-tracker='${list} $f
+else
+    sed -i "s@bt-tracker.*@bt-tracker=$list@g" $f
+fi
+# start
 aria2c --conf=/etc/aria2/aria2.conf -D
 pgrep aria2c
 # node
@@ -64,4 +77,6 @@ apt-get install -y nodejs
 # http-server
 npm i -g http-server
 nohup http-server /download -p 80&
+echo "" >> /etc/rc.local
+echo "http-server /download -p 80&" >> /etc/rc.local
 ```
