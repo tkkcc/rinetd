@@ -1,6 +1,8 @@
-change all "..."
+## debian8/9 openvz&kvm replace "..."
+
+### ssh ss bbr
+
 ```sh
-# debian 8/9 openvz&kvm
 echo 'deb [arch=amd64] http://ftp.us.debian.org/debian/ stable main contrib non-free' > /etc/apt/sources.list
 apt update
 apt install -y ca-certificates htop curl wget openssh-server vim ranger git shadowsocks-libev aria2 iptables
@@ -16,7 +18,7 @@ sed -i 's/^PubkeyAuthentication no/#&/' /etc/ssh/sshd_config
 echo 'PasswordAuthentication no' >> /etc/ssh/sshd_config
 echo 'PubkeyAuthentication yes' >> /etc/ssh/sshd_config
 systemctl restart sshd
-# ss
+## ss
 cat>/etc/shadowsocks-libev/config.json<<EOF
 {
     "server":"0.0.0.0",
@@ -37,6 +39,8 @@ echo "/usr/bin/rinetd -f -c /etc/rinetd.conf raw $iface&" >> /etc/rc.local
 chmod +x /etc/rc.local
 ```
 > `rinetd` is same as [nanqinlang](https://github.com/tcp-nanqinlang/lkl-rinetd), better than [linhua55](https://github.com/linhua55/lkl_study) in my case
+
+### aria2 http-server
 
 ```sh
 # aria2
@@ -62,7 +66,7 @@ rpc-secret=...
 EOF
 # update tracker
 f=/etc/aria2/aria2.conf
-list=`wget -qO- https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_all.txt|awk NF|sed ":a;N;s/\n/,/g;ta"`
+list=`wget -qO- https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_best.txt|awk NF|sed ":a;N;s/\n/,/g;ta"`
 if [ -z "`grep "bt-tracker" $f`" ]; then
     sed -i '$a bt-tracker='${list} $f
 else
